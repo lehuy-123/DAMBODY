@@ -1,0 +1,43 @@
+.menuWrapper {
+  display: flex;
+  justify-content: space-around; /* bạn có thể dùng 'space-between' nếu muốn sát mép hơn */
+  align-items: center;
+  padding: 12px 16px;
+  background-color: black;
+  border-bottom: 1px solid #333;
+  flex-wrap: nowrap;
+  overflow-x: auto; /* hỗ trợ scroll ngang trên mobile nếu cần */
+}
+
+.menuItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 20px; /* GIẢM margin lại để các icon sát nhau hơn */
+  font-size: 12px;
+  color: white;
+  min-width: 50px; /* tránh co icon quá nhỏ */
+}
+
+.menuItem img {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+
+
+.icon {
+  font-size: 20px;
+  color: white;
+  margin-bottom: 6px;
+}
+.label {
+  font-size: 11px;
+  text-align: center;
+}
+@media (min-width: 1024px) {
+  .menuWrapper {
+    justify-content: center;
+    gap: 24px;
+  }
+}

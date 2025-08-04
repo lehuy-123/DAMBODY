@@ -1,0 +1,129 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #000;
+  padding: 12px 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  justify-content: center;
+}
+
+.searchLabel {
+  color: #ff0050; /* Màu hồng TikTok */
+  font-weight: 550;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.searchInput {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #ff0050;
+  background: #111;
+  color: #fff;
+  width: 530px;
+  outline: none;
+}
+
+.cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: #ff0050;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.suggestBar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 0;
+  background-color: #000;
+}
+
+.suggestBar button {
+  background: transparent;
+  border: 1px solid #ff0050;
+  border-radius: 20px;
+  padding: 6px 16px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+
+
+
+.user {
+  position: relative;
+  cursor: pointer;
+}
+
+.userDropdown {
+  display: none;
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #fff;
+  color: #000;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 1000;
+  min-width: 160px;
+  /* Add padding to top to create a hover buffer */
+  padding-top: 20px;
+  /* Move the dropdown up to compensate for the padding */
+  margin-top: -10px;
+}
+
+.user:hover .userDropdown,
+.userDropdown:hover {
+  display: block;
+}
+
+.userDropdown a,
+.userDropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.userDropdown a:hover,
+.userDropdown button:hover {
+  background-color: #f0f0f0;
+}
