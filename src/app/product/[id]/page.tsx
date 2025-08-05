@@ -115,7 +115,7 @@ export default function ProductDetailPage() {
                 }
               }}
             >
-              <option value="">-- Chọn màu / size --</option>
+              <option value="">Chọn màu / size</option>
               {product.variants.map((variant, index) => (
                 <option key={index} value={index}>
                   {variant.color} / {variant.size} - {variant.price.toLocaleString('vi-VN')}₫ (Còn {variant.stock})

@@ -19,6 +19,9 @@ interface Variant {
   size: string;
   price: number;
   stock: number;
+  material?: string;
+  description?: string;
+  status?: string;
 }
 
 export default function ProductForm({ onCreated }: Props) {
@@ -68,7 +71,7 @@ export default function ProductForm({ onCreated }: Props) {
       const formData = new FormData();
       Object.entries(form).forEach(([k, v]) => formData.append(k, String(v)));
       formData.append('image', imageFile);
-      formData.append('variants', JSON.stringify(variants)); // ✅ QUAN TRỌNG
+      formData.append('variants', JSON.stringify(variants));
 
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/products`,
@@ -152,7 +155,7 @@ export default function ProductForm({ onCreated }: Props) {
       <div style={{ gridColumn: 'span 2' }}>
         <h4>Tuỳ chọn biến thể</h4>
         {variants.map((v, idx) => (
-          <div key={idx} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
             <input placeholder="Màu sắc" value={v.color} onChange={(e) => {
               const newVars = [...variants];
               newVars[idx].color = e.target.value;
@@ -176,6 +179,27 @@ export default function ProductForm({ onCreated }: Props) {
               newVars[idx].stock = Number(e.target.value);
               setVariants(newVars);
             }} style={inputStyle} />
+
+            <input placeholder="Chất liệu (tuỳ chọn)" value={v.material || ''} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].material = e.target.value;
+              setVariants(newVars);
+            }} style={inputStyle} />
+
+            <input placeholder="Mô tả (tuỳ chọn)" value={v.description || ''} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].description = e.target.value;
+              setVariants(newVars);
+            }} style={inputStyle} />
+
+            <select value={v.status || 'Còn hàng'} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].status = e.target.value;
+              setVariants(newVars);
+            }} style={inputStyle}>
+              <option value="Còn hàng">Còn hàng</option>
+              <option value="Hết hàng">Hết hàng</option>
+            </select>
 
             <button type="button" onClick={() => setVariants(variants.filter((_, i) => i !== idx))}>
               ❌
