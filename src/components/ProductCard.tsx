@@ -8,9 +8,15 @@ interface Product {
   _id: string;
   image: string;
   name: string;
-  price: number;
+  price?: number; // ✅ sửa thành optional
   sold?: number;
   category?: string;
+  variants?: {
+    color: string;
+    size: string;
+    price: number;
+    stock: number;
+  }[];
 }
 
 interface Category {
@@ -36,7 +42,6 @@ export default function ProductCard({ product, admin, onDelete, categories = [] 
     ? `http://localhost:5001${product.image.startsWith('/') ? '' : '/'}${product.image}`
     : '/default-image.jpg';
 
-  // ✅ Hàm duyệt toàn bộ cây danh mục
   const flattenCategories = (cats: Category[]): Category[] => {
     let result: Category[] = [];
     for (const cat of cats) {
@@ -48,7 +53,13 @@ export default function ProductCard({ product, admin, onDelete, categories = [] 
     return result;
   };
 
-  const categoryName = flattenCategories(categories).find(c => c._id === product.category)?.name || 'Không rõ';
+  const categoryName =
+    flattenCategories(categories).find((c) => c._id === product.category)?.name || 'Không rõ';
+
+  const displayPrice =
+    typeof product.price === 'number'
+      ? product.price
+      : product.variants?.[0]?.price;
 
   return (
     <div className={styles.card}>
@@ -59,7 +70,7 @@ export default function ProductCard({ product, admin, onDelete, categories = [] 
             alt={product.name}
             fill
             className={styles.image}
-            priority
+            sizes="(max-width: 768px) 100vw, 300px"
           />
         </div>
         <div className={styles.content}>
@@ -67,7 +78,9 @@ export default function ProductCard({ product, admin, onDelete, categories = [] 
           <p className={styles.category}>Danh mục: {categoryName}</p>
           <div className={styles.priceRow}>
             <span className={styles.price}>
-              {product.price.toLocaleString('vi-VN')}₫
+              {typeof displayPrice === 'number'
+                ? displayPrice.toLocaleString('vi-VN') + '₫'
+                : 'Giá chưa cập nhật'}
             </span>
             {product.sold && <span className={styles.sold}>Đã bán {product.sold}</span>}
           </div>
@@ -78,6 +91,7 @@ export default function ProductCard({ product, admin, onDelete, categories = [] 
         <button
           className={styles.delete}
           onClick={(e) => {
+            e.preventDefault(); // ✅ Ngăn link điều hướng
             e.stopPropagation();
             onDelete?.();
           }}

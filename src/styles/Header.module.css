@@ -12,12 +12,14 @@
 }
 
 .center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-45%);
   display: flex;
   align-items: center;
-  gap: 20px;
-  flex: 1;
-  justify-content: center;
+  gap: 12px;
 }
+
 
 .searchLabel {
   color: #ff0050; /* Màu hồng TikTok */
@@ -36,11 +38,13 @@
   outline: none;
 }
 
+/* 👇 Giỏ hàng */
 .cart {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 16px; /* 👈 tạo khoảng cách với icon user */
 }
 
 .cartBadge {
@@ -54,6 +58,7 @@
   padding: 2px 6px;
 }
 
+/* 👇 Gợi ý tab */
 .suggestBar {
   display: flex;
   justify-content: center;
@@ -72,15 +77,12 @@
   cursor: pointer;
 }
 
+/* 👇 Icon giỏ hàng và user */
 .actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 28px; /* 👈 tăng khoảng cách giữa cart và user */
 }
-
-
-
-
 
 .user {
   position: relative;
@@ -96,12 +98,10 @@
   color: #000;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 1000;
   min-width: 160px;
-  /* Add padding to top to create a hover buffer */
   padding-top: 20px;
-  /* Move the dropdown up to compensate for the padding */
   margin-top: -10px;
 }
 

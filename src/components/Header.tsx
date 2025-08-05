@@ -67,13 +67,8 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Thanh gợi ý */}
-      <div className={styles.suggestBar}>
-        <button>🔥 Flash Sale</button>
-        <button>🎯 Giá dưới 100K</button>
-        <button>💻 Đồ công nghệ</button>
-        <button>🆕 Hàng mới về</button>
-      </div>
+ 
+     
     </>
   );
 }

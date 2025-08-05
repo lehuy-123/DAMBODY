@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProductCard from '@/components/ProductCard';
@@ -50,8 +49,16 @@ export default function HomePage() {
   const parentCategories = categories.filter((cat) => !cat.parent);
   const getChildCategories = (parentId: string) =>
     categories.filter((cat) => cat.parent === parentId);
-  const getProductsByCategory = (categoryId: string) =>
-    products.filter((p) => p.category === categoryId);
+
+  const getProductsByCategory = (categoryId: string, parentId: string) => {
+    if (categoryId === 'all') {
+      const childIds = getChildCategories(parentId).map((cat) => cat._id);
+      return products.filter((p) =>
+        [parentId, ...childIds].includes(p.category)
+      );
+    }
+    return products.filter((p) => p.category === categoryId);
+  };
 
   return (
     <div className={styles.container}>
@@ -80,13 +87,27 @@ export default function HomePage() {
       {/* CATEGORY SECTION */}
       {parentCategories.map((parent) => {
         const children = getChildCategories(parent._id);
-        const activeChildId = activeTab[parent._id] || children[0]?._id;
+        const activeChildId = activeTab[parent._id] || 'all';
 
         return (
           <div key={parent._id} className={styles.categorySection}>
             <h3 className={styles.categoryTitle}>{parent.name}</h3>
 
             <div className={styles.tabList}>
+              {/* Nút Tất cả */}
+              <button
+                key="all"
+                onClick={() =>
+                  setActiveTab((prev) => ({ ...prev, [parent._id]: 'all' }))
+                }
+                className={`${styles.tabButton} ${
+                  activeChildId === 'all' ? styles.tabButtonActive : ''
+                }`}
+              >
+                Tất cả
+              </button>
+
+              {/* Các danh mục con */}
               {children.map((child) => (
                 <button
                   key={child._id}
@@ -103,8 +124,12 @@ export default function HomePage() {
             </div>
 
             <div className={styles.productGrid}>
-              {getProductsByCategory(activeChildId!).map((product) => (
-                <ProductCard key={product._id} product={product} categories={categories} />
+              {getProductsByCategory(activeChildId, parent._id).map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  categories={categories}
+                />
               ))}
             </div>
           </div>

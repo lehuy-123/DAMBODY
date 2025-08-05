@@ -14,8 +14,15 @@ interface Category {
   parent?: Category | null | string;
 }
 
+interface Variant {
+  color: string;
+  size: string;
+  price: number;
+  stock: number;
+}
+
 export default function ProductForm({ onCreated }: Props) {
-  const [form, setForm] = useState<Omit<Product, '_id' | 'image'>>({
+  const [form, setForm] = useState<Omit<Product, '_id' | 'image' | 'variants'>>({
     name: '',
     price: 0,
     description: '',
@@ -26,6 +33,7 @@ export default function ProductForm({ onCreated }: Props) {
     status: 'Còn hàng',
   });
 
+  const [variants, setVariants] = useState<Variant[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -60,6 +68,7 @@ export default function ProductForm({ onCreated }: Props) {
       const formData = new FormData();
       Object.entries(form).forEach(([k, v]) => formData.append(k, String(v)));
       formData.append('image', imageFile);
+      formData.append('variants', JSON.stringify(variants)); // ✅ QUAN TRỌNG
 
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/products`,
@@ -80,16 +89,14 @@ export default function ProductForm({ onCreated }: Props) {
         status: 'Còn hàng',
       });
       setImageFile(null);
+      setVariants([]);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
       alert(`❌ Lỗi khi thêm sản phẩm: ${err.response?.data?.message || 'Không xác định'}`);
     }
   };
 
-  // ✅ Render tất cả danh mục con theo dạng cây rẽ nhánh (vô tận cấp)
-const renderCategoryOptions = (parentId: string | null = null, level = 0): React.ReactNode[] => {
-
-
+  const renderCategoryOptions = (parentId: string | null = null, level = 0): React.ReactNode[] => {
     return categories
       .filter((cat) => {
         const parent = typeof cat.parent === 'string' ? cat.parent : cat.parent?._id || null;
@@ -102,6 +109,8 @@ const renderCategoryOptions = (parentId: string | null = null, level = 0): React
         ...renderCategoryOptions(cat._id, level + 1),
       ]);
   };
+
+  const inputStyle = { padding: '10px', borderRadius: '5px', border: 'none' };
 
   return (
     <form
@@ -117,111 +126,69 @@ const renderCategoryOptions = (parentId: string | null = null, level = 0): React
         color: '#fff',
       }}
     >
-      <input
-        name="name"
-        value={form.name}
-        onChange={handleChange}
-        placeholder="Tên sản phẩm"
-        required
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
-      <input
-        name="price"
-        type="number"
-        value={form.price}
-        onChange={handleChange}
-        placeholder="Giá"
-        required
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-        required
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
-      <input
-        name="material"
-        value={form.material}
-        onChange={handleChange}
-        placeholder="Chất liệu"
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
-      <input
-        name="colors"
-        value={form.colors}
-        onChange={handleChange}
-        placeholder="Màu sắc"
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
-      <input
-        name="sizes"
-        value={form.sizes}
-        onChange={handleChange}
-        placeholder="Size"
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
+      <input name="name" value={form.name} onChange={handleChange} placeholder="Tên sản phẩm" required style={inputStyle} />
+      <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="Giá" required style={inputStyle} />
+      <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} required style={inputStyle} />
+      <input name="material" value={form.material} onChange={handleChange} placeholder="Chất liệu" style={inputStyle} />
+      <input name="colors" value={form.colors} onChange={handleChange} placeholder="Màu sắc" style={inputStyle} />
+      <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="Size" style={inputStyle} />
 
-      <select
-        name="category"
-        value={form.category}
-        onChange={handleChange}
-        required
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      >
+      <select name="category" value={form.category} onChange={handleChange} required style={inputStyle}>
         <option value="">-- Chọn danh mục --</option>
         {renderCategoryOptions()}
       </select>
 
-      <select
-        name="status"
-        value={form.status}
-        onChange={handleChange}
-        style={{ padding: '10px', borderRadius: '5px', border: 'none' }}
-      >
+      <select name="status" value={form.status} onChange={handleChange} style={inputStyle}>
         <option value="Còn hàng">Còn hàng</option>
         <option value="Hết hàng">Hết hàng</option>
       </select>
 
-      <textarea
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-        placeholder="Mô tả sản phẩm"
-        rows={4}
-        style={{ gridColumn: 'span 2', padding: '10px', borderRadius: '5px', border: 'none' }}
-      />
+      <textarea name="description" value={form.description} onChange={handleChange} placeholder="Mô tả sản phẩm" rows={4} style={{ gridColumn: 'span 2', ...inputStyle }} />
 
       {imageFile && (
-        <img
-          src={URL.createObjectURL(imageFile)}
-          alt="preview"
-          style={{
-            gridColumn: 'span 2',
-            width: '100%',
-            height: 'auto',
-            objectFit: 'contain',
-            borderRadius: '8px',
-            marginTop: '10px',
-          }}
-        />
+        <img src={URL.createObjectURL(imageFile)} alt="preview" style={{ gridColumn: 'span 2', width: '100%', height: 'auto', objectFit: 'contain', borderRadius: '8px', marginTop: '10px' }} />
       )}
 
-      <button
-        type="submit"
-        style={{
-          gridColumn: 'span 2',
-          padding: '12px',
-          backgroundColor: '#e60023',
-          color: '#fff',
-          fontWeight: 'bold',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '16px',
-        }}
-      >
+      <div style={{ gridColumn: 'span 2' }}>
+        <h4>Tuỳ chọn biến thể</h4>
+        {variants.map((v, idx) => (
+          <div key={idx} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <input placeholder="Màu sắc" value={v.color} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].color = e.target.value;
+              setVariants(newVars);
+            }} style={inputStyle} />
+
+            <input placeholder="Kích cỡ" value={v.size} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].size = e.target.value;
+              setVariants(newVars);
+            }} style={inputStyle} />
+
+            <input type="number" placeholder="Giá" value={v.price} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].price = Number(e.target.value);
+              setVariants(newVars);
+            }} style={inputStyle} />
+
+            <input type="number" placeholder="Kho" value={v.stock} onChange={(e) => {
+              const newVars = [...variants];
+              newVars[idx].stock = Number(e.target.value);
+              setVariants(newVars);
+            }} style={inputStyle} />
+
+            <button type="button" onClick={() => setVariants(variants.filter((_, i) => i !== idx))}>
+              ❌
+            </button>
+          </div>
+        ))}
+
+        <button type="button" onClick={() => setVariants([...variants, { color: '', size: '', price: 0, stock: 0 }])}>
+          + Thêm biến thể
+        </button>
+      </div>
+
+      <button type="submit" style={{ gridColumn: 'span 2', padding: '12px', backgroundColor: '#e60023', color: '#fff', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px' }}>
         Thêm sản phẩm
       </button>
     </form>
