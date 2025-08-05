@@ -4,8 +4,8 @@ const nextConfig = {
     domains: ['localhost'], // đảm bảo đã có dòng này
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
+        protocol: 'https',
+        hostname: 'example.com',
         port: '5001', // quan trọng!
         pathname: '/uploads/**',
       },

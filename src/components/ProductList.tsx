@@ -1,10 +1,14 @@
 'use client';
 
+
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProductCard from '@/components/ProductCard';
+import { MdOutlineLocalOffer } from 'react-icons/md';
+import { BsCheckCircleFill } from 'react-icons/bs';
+import styles from '@/styles/ProductList.module.css';
 
-export interface Product {
+interface Product {
   _id: string;
   name: string;
   price: number;
@@ -20,11 +24,13 @@ export interface Product {
 interface Category {
   _id: string;
   name: string;
+  parent?: string | null;
 }
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [activeTab, setActiveTab] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchProducts();
@@ -32,53 +38,78 @@ export default function HomePage() {
   }, []);
 
   const fetchProducts = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/products');
-      setProducts(res.data);
-    } catch (err) {
-      console.error('Lỗi khi load sản phẩm:', err);
-    }
+    const res = await axios.get('http://localhost:5001/api/products');
+    setProducts(res.data);
   };
 
   const fetchCategories = async () => {
-    try {
-      const res = await axios.get('http://localhost:5001/api/categories');
-      setCategories(res.data);
-    } catch (err) {
-      console.error('Lỗi khi load danh mục:', err);
-    }
+    const res = await axios.get('http://localhost:5001/api/categories');
+    setCategories(res.data);
   };
 
-  const groupedProducts = products.reduce((acc, product) => {
-    const cat = product.category || 'Khác';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(product);
-    return acc;
-  }, {} as Record<string, Product[]>);
-
-  const getCategoryName = (id: string): string => {
-    return categories.find((c) => c._id === id)?.name || 'Không rõ';
-  };
+  const parentCategories = categories.filter((cat) => !cat.parent);
+  const getChildCategories = (parentId: string) =>
+    categories.filter((cat) => cat.parent === parentId);
+  const getProductsByCategory = (categoryId: string) =>
+    products.filter((p) => p.category === categoryId);
 
   return (
-    <div style={{ padding: '2rem', background: '#000', minHeight: '100vh' }}>
-      <h2 style={{ color: '#fff', fontSize: '24px', marginBottom: '1.5rem' }}>🛍️ Sản phẩm theo danh mục</h2>
-
-      {Object.entries(groupedProducts).map(([categoryId, items]) => (
-        <div key={categoryId} style={{ marginBottom: '3rem' }}>
-          <h3 style={{ color: '#f43f5e', fontSize: '20px', margin: '1rem 0' }}>{getCategoryName(categoryId)}</h3>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-            gap: '20px'
-          }}>
-            {items.map((product) => (
-              <ProductCard key={product._id} product={product} categories={categories} />
-            ))}
-          </div>
+    <div className={styles.container}>
+      {/* QUICK TAGS */}
+      <div className={styles.quickMenu}>
+        <div className={styles.tags}>
+          <button className={`${styles.tag} ${styles.tagActive}`}>
+            <MdOutlineLocalOffer />
+            Flash Sale
+          </button>
+          <button className={styles.tag}>
+            <MdOutlineLocalOffer />
+            Giá dưới 100K
+          </button>
+          <button className={styles.tag}>
+            <BsCheckCircleFill />
+            Đồ công nghệ
+          </button>
+          <button className={styles.tag}>
+            <MdOutlineLocalOffer />
+            Hàng mới về
+          </button>
         </div>
-      ))}
+      </div>
+
+      {/* CATEGORY SECTION */}
+      {parentCategories.map((parent) => {
+        const children = getChildCategories(parent._id);
+        const activeChildId = activeTab[parent._id] || children[0]?._id;
+
+        return (
+          <div key={parent._id} className={styles.categorySection}>
+            <h3 className={styles.categoryTitle}>{parent.name}</h3>
+
+            <div className={styles.tabList}>
+              {children.map((child) => (
+                <button
+                  key={child._id}
+                  onClick={() =>
+                    setActiveTab((prev) => ({ ...prev, [parent._id]: child._id }))
+                  }
+                  className={`${styles.tabButton} ${
+                    activeChildId === child._id ? styles.tabButtonActive : ''
+                  }`}
+                >
+                  {child.name}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.productGrid}>
+              {getProductsByCategory(activeChildId!).map((product) => (
+                <ProductCard key={product._id} product={product} categories={categories} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

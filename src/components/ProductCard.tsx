@@ -16,6 +16,8 @@ interface Product {
 interface Category {
   _id: string;
   name: string;
+  parent?: string | null;
+  children?: Category[];
 }
 
 interface Props {
@@ -25,7 +27,7 @@ interface Props {
   categories?: Category[];
 }
 
-export default function ProductCard({ product, admin, onDelete, categories }: Props) {
+export default function ProductCard({ product, admin, onDelete, categories = [] }: Props) {
   if (!product) return null;
 
   const imageUrl = product.image?.startsWith('http')
@@ -34,7 +36,19 @@ export default function ProductCard({ product, admin, onDelete, categories }: Pr
     ? `http://localhost:5001${product.image.startsWith('/') ? '' : '/'}${product.image}`
     : '/default-image.jpg';
 
-  const categoryName = categories?.find((c) => c._id === product.category)?.name || 'Không rõ';
+  // ✅ Hàm duyệt toàn bộ cây danh mục
+  const flattenCategories = (cats: Category[]): Category[] => {
+    let result: Category[] = [];
+    for (const cat of cats) {
+      result.push(cat);
+      if (cat.children?.length) {
+        result = result.concat(flattenCategories(cat.children));
+      }
+    }
+    return result;
+  };
+
+  const categoryName = flattenCategories(categories).find(c => c._id === product.category)?.name || 'Không rõ';
 
   return (
     <div className={styles.card}>
