@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [categoryName, setCategoryName] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<string>(''); // giữ index dạng string
 
   useEffect(() => {
     if (!id) return;
@@ -67,6 +67,24 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [id]);
 
+  const selectedVariant =
+    selectedIndex === '' ? null : product?.variants?.[parseInt(selectedIndex)];
+
+  const displayedImage = selectedVariant?.image
+    ? `http://localhost:5001${selectedVariant.image}`
+    : product?.image?.startsWith('http')
+    ? product.image
+    : `http://localhost:5001${product?.image}`;
+
+  const displayedPrice =
+    selectedVariant?.price ?? product?.price ?? product?.variants?.[0]?.price;
+
+  const displayedMaterial = selectedVariant?.material ?? product?.material;
+  const displayedDescription = selectedVariant?.description ?? product?.description;
+  const displayedColor = selectedVariant?.color ?? product?.colors;
+  const displayedSize = selectedVariant?.size ?? product?.sizes;
+  const displayedStatus = selectedVariant?.status ?? product?.status;
+
   const handleOrderNow = () => {
     if (!selectedVariant) {
       alert('Vui lòng chọn biến thể trước khi đặt hàng.');
@@ -80,18 +98,6 @@ export default function ProductDetailPage() {
 
   if (loading) return <p className={styles.loading}>Đang tải...</p>;
   if (!product) return <p className={styles.error}>Không tìm thấy sản phẩm.</p>;
-
-  const fallbackPrice =
-    typeof product.price === 'number'
-      ? product.price
-      : product.variants?.[0]?.price;
-
-  const displayedImage =
-    selectedVariant?.image
-      ? `http://localhost:5001${selectedVariant.image}`
-      : product.image.startsWith('http')
-        ? product.image
-        : `http://localhost:5001${product.image}`;
 
   return (
     <main className={styles.detailContainer}>
@@ -108,21 +114,14 @@ export default function ProductDetailPage() {
       <div className={styles.infoBox}>
         <h1 className={styles.productName}>{product.name}</h1>
 
-        {/* Chọn biến thể nếu có */}
         {product.variants && product.variants.length > 0 && (
           <>
             <label><strong>Chọn biến thể:</strong></label>
             <select
-              onChange={(e) => {
-                const index = Number(e.target.value);
-                if (!isNaN(index) && product.variants && product.variants[index]) {
-                  setSelectedVariant(product.variants[index]);
-                } else {
-                  setSelectedVariant(null);
-                }
-              }}
+              value={selectedIndex}
+              onChange={(e) => setSelectedIndex(e.target.value)}
             >
-              <option value="">Chọn màu / size</option>
+              <option value="">Sản phẩm chính</option>
               {product.variants.map((variant, index) => (
                 <option key={index} value={index}>
                   {variant.color} / {variant.size} - {variant.price.toLocaleString('vi-VN')}₫ (Còn {variant.stock})
@@ -132,20 +131,19 @@ export default function ProductDetailPage() {
           </>
         )}
 
-        {/* Giá hiển thị */}
         <p className={styles.price}>
-          {(selectedVariant?.price ?? fallbackPrice)?.toLocaleString('vi-VN')}₫
+          {displayedPrice?.toLocaleString('vi-VN')}₫
         </p>
 
         <p className={styles.status}>
-          <strong>Trạng thái:</strong> {product.status || 'Đang cập nhật'}
+          <strong>Trạng thái:</strong> {displayedStatus || 'Đang cập nhật'}
         </p>
 
         <div className={styles.meta}>
-          {product.description && <p><strong>📝 Mô tả:</strong> {product.description}</p>}
-          {product.material && <p><strong>🔧 Chất liệu:</strong> {product.material}</p>}
-          {product.colors && <p><strong>🎨 Màu sắc:</strong> {product.colors}</p>}
-          {product.sizes && <p><strong>📏 Kích cỡ:</strong> {product.sizes}</p>}
+          {displayedDescription && <p><strong>📝 Mô tả:</strong> {displayedDescription}</p>}
+          {displayedMaterial && <p><strong>🔧 Chất liệu:</strong> {displayedMaterial}</p>}
+          {displayedColor && <p><strong>🎨 Màu sắc:</strong> {displayedColor}</p>}
+          {displayedSize && <p><strong>📏 Kích cỡ:</strong> {displayedSize}</p>}
           {categoryName && <p><strong>📂 Danh mục:</strong> {categoryName}</p>}
         </div>
 
