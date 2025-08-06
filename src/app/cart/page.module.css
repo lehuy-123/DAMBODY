@@ -70,3 +70,25 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.qtyBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px;
+}
+
+.qtyBox button {
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.qtyBox span {
+  width: 20px;
+  text-align: center;
+  color: white;
+}

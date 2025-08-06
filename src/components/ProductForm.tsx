@@ -2,17 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
-import type { Product } from '@/types/Product';
 
-interface Props {
-  onCreated: () => void;
-}
-
-interface Category {
-  _id: string;
-  name: string;
-  parent?: Category | null | string;
-}
 
 interface Variant {
   color: string;
@@ -22,10 +12,36 @@ interface Variant {
   material?: string;
   description?: string;
   status?: string;
-  image?: File | null;
+  image?: File | string | null;
 }
 
-export default function ProductForm({ onCreated }: Props) {
+interface Product {
+  _id?: string;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  material: string;
+  colors: string;
+  sizes: string;
+  category: string;
+  status: string;
+  variants?: Variant[]; // ✅ FIXED
+}
+
+interface Props {
+  onCreated: () => void;
+  editingProduct?: Product | null;
+  onUpdated?: () => void;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  parent?: Category | null | string;
+}
+
+export default function ProductForm({ onCreated, editingProduct, onUpdated }: Props) {
   const [form, setForm] = useState<Omit<Product, '_id' | 'image' | 'variants'>>({
     name: '',
     price: 0,
@@ -51,6 +67,24 @@ export default function ProductForm({ onCreated }: Props) {
       });
   }, []);
 
+  useEffect(() => {
+    if (editingProduct) {
+      setForm({
+        name: editingProduct.name,
+        price: editingProduct.price,
+        description: editingProduct.description,
+        material: editingProduct.material,
+        colors: editingProduct.colors,
+        sizes: editingProduct.sizes,
+        category: editingProduct.category,
+        status: editingProduct.status,
+      });
+
+      setVariants(editingProduct.variants || []);
+      setImageFile(null);
+    }
+  }, [editingProduct]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -64,38 +98,46 @@ export default function ProductForm({ onCreated }: Props) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!imageFile) return alert('Vui lòng chọn ảnh');
-    if (imageFile.size > 5 * 1024 * 1024) return alert('Ảnh vượt quá 5MB');
-    if (!imageFile.type.startsWith('image/')) return alert('Tệp không phải ảnh');
+    if (!editingProduct && !imageFile) return alert('Vui lòng chọn ảnh');
 
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([k, v]) => formData.append(k, String(v)));
-      formData.append('main', imageFile);
+      if (imageFile) formData.append('main', imageFile);
 
       const variantData = variants.map((v) => {
         const { image, ...rest } = v;
         return {
           ...rest,
-          imageName: image?.name || '',
+          imageName: image instanceof File ? image.name : '',
         };
       });
       formData.append('variants', JSON.stringify(variantData));
 
       variants.forEach((v) => {
-        if (v.image) {
+        if (v.image instanceof File) {
           formData.append('variantImages', v.image);
         }
       });
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/products`,
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
+      if (editingProduct) {
+        await axios.put(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/products/${editingProduct._id}`,
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        alert('✅ Cập nhật sản phẩm thành công');
+        onUpdated?.();
+      } else {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/products`,
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        alert('✅ Thêm sản phẩm thành công');
+        onCreated();
+      }
 
-      alert('✅ Thêm sản phẩm thành công');
-      onCreated();
       setForm({
         name: '',
         price: 0,
@@ -110,7 +152,7 @@ export default function ProductForm({ onCreated }: Props) {
       setVariants([]);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
-      alert(`❌ Lỗi khi thêm sản phẩm: ${err.response?.data?.message || 'Không xác định'}`);
+      alert(`❌ Lỗi khi lưu sản phẩm: ${err.response?.data?.message || 'Không xác định'}`);
     }
   };
 
@@ -146,7 +188,7 @@ export default function ProductForm({ onCreated }: Props) {
     >
       <input name="name" value={form.name} onChange={handleChange} placeholder="Tên sản phẩm" required style={inputStyle} />
       <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="Giá" required style={inputStyle} />
-      <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} required style={inputStyle} />
+      <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} style={inputStyle} />
       <input name="material" value={form.material} onChange={handleChange} placeholder="Chất liệu" style={inputStyle} />
       <input name="colors" value={form.colors} onChange={handleChange} placeholder="Màu sắc" style={inputStyle} />
       <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="Size" style={inputStyle} />
@@ -232,7 +274,7 @@ export default function ProductForm({ onCreated }: Props) {
       </div>
 
       <button type="submit" style={{ gridColumn: 'span 2', padding: '12px', backgroundColor: '#e60023', color: '#fff', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px' }}>
-        Thêm sản phẩm
+        {editingProduct ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm'}
       </button>
     </form>
   );

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import styles from './page.module.css';
-import { useCart } from '@/context/CartContext'; // ✅ import context giỏ hàng
+import { useCart } from '@/context/CartContext';
 
 interface Variant {
   color: string;
@@ -44,7 +44,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState<string>(''); // giữ index dạng string
 
-  const { addToCart } = useCart(); // ✅ dùng context giỏ hàng
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (!id) return;
@@ -89,30 +89,30 @@ export default function ProductDetailPage() {
   const displayedStatus = selectedVariant?.status ?? product?.status;
 
   const handleOrderNow = () => {
-    if (!selectedVariant) {
-      alert('Vui lòng chọn biến thể trước khi đặt hàng.');
-      return;
-    }
+    if (!product) return;
+
+    const color = selectedVariant?.color ?? product.colors ?? 'Không có';
+    const size = selectedVariant?.size ?? product.sizes ?? 'Không có';
+    const price = selectedVariant?.price ?? product.price ?? 0;
 
     alert(
-      `Bạn đã đặt sản phẩm: ${product?.name}\nMàu: ${selectedVariant.color}\nKích cỡ: ${selectedVariant.size}\nGiá: ${selectedVariant.price.toLocaleString('vi-VN')}₫`
+      `Bạn đã đặt sản phẩm: ${product.name}\nMàu: ${color}\nKích cỡ: ${size}\nGiá: ${price.toLocaleString('vi-VN')}₫`
     );
   };
 
   const handleAddToCart = () => {
     if (!product) return;
 
+    const color = selectedVariant?.color ?? product.colors;
+    const size = selectedVariant?.size ?? product.sizes;
+    const price = selectedVariant?.price ?? product.price ?? 0;
+
     const cartItem = {
       productId: product._id,
       name: product.name,
       image: displayedImage,
-      price: displayedPrice || 0,
-      variant: selectedVariant
-        ? {
-            color: selectedVariant.color,
-            size: selectedVariant.size,
-          }
-        : undefined,
+      price,
+      variant: color && size ? { color, size } : undefined,
       quantity: 1,
     };
 
@@ -147,7 +147,7 @@ export default function ProductDetailPage() {
             >
               <option value="">Sản phẩm chính</option>
               {product.variants.map((variant, index) => (
-                <option key={index} value={index}>
+                <option key={index} value={index.toString()}>
                   {variant.color} / {variant.size} - {variant.price.toLocaleString('vi-VN')}₫ (Còn {variant.stock})
                 </option>
               ))}

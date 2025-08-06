@@ -7,6 +7,18 @@ import ProductForm from '@/components/ProductForm';
 import ProductCard from '@/components/ProductCard';
 import CategoryManager from '@/components/CategoryManager';
 
+// ✅ Khai báo type rõ ràng cho biến thể
+interface Variant {
+  color: string;
+  size: string;
+  price: number;
+  stock: number;
+  material?: string;
+  description?: string;
+  status?: string;
+  image?: string;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -18,6 +30,7 @@ export interface Product {
   sizes: string;
   category: string;
   status: string;
+  variants?: Variant[]; // ✅ Đã fix any
 }
 
 interface Category {
@@ -27,7 +40,6 @@ interface Category {
   children: Category[];
 }
 
-// 👉 Phải định nghĩa trước khi sử dụng
 const getFlatCategories = (cats: Category[]): Category[] => {
   let result: Category[] = [];
   for (const cat of cats) {
@@ -43,6 +55,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const selectedCategory = useMemo(() => {
     return selectedCategoryId
@@ -94,6 +107,11 @@ export default function AdminPage() {
     fetchProducts();
   };
 
+  const handleProductUpdated = () => {
+    fetchProducts();
+    setEditingProduct(null);
+  };
+
   const getAllCategoryIds = (category: Category): string[] => {
     let ids = [category._id];
     for (const child of category.children || []) {
@@ -143,6 +161,12 @@ export default function AdminPage() {
     return category ? category.name : 'Không rõ';
   };
 
+  useEffect(() => {
+    if (editingProduct) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [editingProduct]);
+
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', background: '#111' }}>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', color: '#fff', textAlign: 'center' }}>
@@ -150,7 +174,11 @@ export default function AdminPage() {
       </h2>
 
       <CategoryManager />
-      <ProductForm onCreated={handleProductCreated} />
+      <ProductForm
+        onCreated={handleProductCreated}
+        editingProduct={editingProduct}
+        onUpdated={handleProductUpdated}
+      />
 
       {/* Bộ lọc danh mục */}
       <div style={{
@@ -245,6 +273,7 @@ export default function AdminPage() {
                 admin
                 categories={categories}
                 onDelete={() => handleDelete(p._id)}
+                onEdit={() => setEditingProduct(p)}
               />
             ))}
           </div>

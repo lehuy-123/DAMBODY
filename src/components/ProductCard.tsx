@@ -8,7 +8,7 @@ interface Product {
   _id: string;
   image: string;
   name: string;
-  price?: number; // ✅ sửa thành optional
+  price?: number;
   sold?: number;
   category?: string;
   variants?: {
@@ -30,10 +30,11 @@ interface Props {
   product?: Product;
   admin?: boolean;
   onDelete?: () => void;
+  onEdit?: () => void; // ✅ THÊM onEdit
   categories?: Category[];
 }
 
-export default function ProductCard({ product, admin, onDelete, categories = [] }: Props) {
+export default function ProductCard({ product, admin, onDelete, onEdit, categories = [] }: Props) {
   if (!product) return null;
 
   const imageUrl = product.image?.startsWith('http')
@@ -88,16 +89,28 @@ export default function ProductCard({ product, admin, onDelete, categories = [] 
       </Link>
 
       {admin && (
-        <button
-          className={styles.delete}
-          onClick={(e) => {
-            e.preventDefault(); // ✅ Ngăn link điều hướng
-            e.stopPropagation();
-            onDelete?.();
-          }}
-        >
-          Xoá
-        </button>
+        <div className={styles.adminActions}>
+          <button
+            className={styles.edit}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEdit?.();
+            }}
+          >
+            ✏️ Sửa
+          </button>
+          <button
+            className={styles.delete}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDelete?.();
+            }}
+          >
+            🗑️ Xoá
+          </button>
+        </div>
       )}
     </div>
   );

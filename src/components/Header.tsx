@@ -5,12 +5,18 @@ import Image from 'next/image';
 import { FiShoppingCart, FiUser } from 'react-icons/fi';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { User } from '@/types/user'; // Đảm bảo đúng đường dẫn của bạn
-import { useCart } from '@/context/CartContext'; // 👈 Import context giỏ hàng
+import { User } from '@/types/user';
+import { useCart } from '@/context/CartContext';
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
-  const { cart } = useCart(); // 👈 Lấy giỏ hàng từ context
+  const { cart } = useCart();
+
+  // ✅ Tránh lỗi hydration
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -39,7 +45,7 @@ export default function Header() {
         {/* Giỏ hàng */}
         <Link href="/cart" className={styles.cart}>
           <FiShoppingCart size={28} color="#fff" />
-          {cart.length > 0 && (
+          {isClient && cart.length > 0 && (
             <span className={styles.cartBadge}>{cart.length}</span>
           )}
         </Link>
