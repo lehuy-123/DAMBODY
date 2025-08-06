@@ -11,6 +11,10 @@ interface Variant {
   size: string;
   price: number;
   stock: number;
+  material?: string;
+  description?: string;
+  status?: string;
+  image?: string;
 }
 
 interface Product {
@@ -82,15 +86,18 @@ export default function ProductDetailPage() {
       ? product.price
       : product.variants?.[0]?.price;
 
+  const displayedImage =
+    selectedVariant?.image
+      ? `http://localhost:5001${selectedVariant.image}`
+      : product.image.startsWith('http')
+        ? product.image
+        : `http://localhost:5001${product.image}`;
+
   return (
     <main className={styles.detailContainer}>
       <div className={styles.imageBox}>
         <Image
-          src={
-            product.image.startsWith('http')
-              ? product.image
-              : `http://localhost:5001${product.image}`
-          }
+          src={displayedImage}
           alt={product.name}
           width={500}
           height={500}

@@ -71,7 +71,7 @@ export default function ProductForm({ onCreated }: Props) {
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([k, v]) => formData.append(k, String(v)));
-      formData.append('image', imageFile);
+      formData.append('main', imageFile);
 
       const variantData = variants.map((v) => {
         const { image, ...rest } = v;
