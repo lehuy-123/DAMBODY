@@ -1,6 +1,8 @@
+// src/app/layout.tsx
 import './globals.css';
 import Header from '@/components/Header';
 import QuickActionMenu from '@/components/QuickActionMenu';
+import { CartProvider } from '@/context/CartContext'; // ✅ thêm dòng này
 
 export const metadata = {
   title: 'TikTok Shop Clone',
@@ -14,10 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body>
-        <Header />
-        <QuickActionMenu />
-        <main>{children}</main>
+      <body className="min-h-screen bg-black text-white">
+        <CartProvider>
+          <Header />
+          <QuickActionMenu />
+          <main>{children}</main>
+        </CartProvider>
       </body>
     </html>
   );

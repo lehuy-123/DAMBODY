@@ -1,0 +1,72 @@
+/* styles/CartPage.module.css */
+.container {
+  padding: 24px;
+  color: #fff;
+  min-height: 100vh;
+}
+
+.heading {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.empty {
+  color: #aaa;
+  font-style: italic;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.info {
+  flex-grow: 1;
+}
+
+.price {
+  color: #f33;
+  font-weight: bold;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: #f66;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderBtn {
+  background: #ff0066;
+  color: #fff;
+  padding: 10px 24px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

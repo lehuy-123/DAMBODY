@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import styles from './page.module.css';
+import { useCart } from '@/context/CartContext'; // ✅ import context giỏ hàng
 
 interface Variant {
   color: string;
@@ -42,6 +43,8 @@ export default function ProductDetailPage() {
   const [categoryName, setCategoryName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState<string>(''); // giữ index dạng string
+
+  const { addToCart } = useCart(); // ✅ dùng context giỏ hàng
 
   useEffect(() => {
     if (!id) return;
@@ -96,6 +99,27 @@ export default function ProductDetailPage() {
     );
   };
 
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    const cartItem = {
+      productId: product._id,
+      name: product.name,
+      image: displayedImage,
+      price: displayedPrice || 0,
+      variant: selectedVariant
+        ? {
+            color: selectedVariant.color,
+            size: selectedVariant.size,
+          }
+        : undefined,
+      quantity: 1,
+    };
+
+    addToCart(cartItem);
+    alert('✅ Đã thêm vào giỏ hàng!');
+  };
+
   if (loading) return <p className={styles.loading}>Đang tải...</p>;
   if (!product) return <p className={styles.error}>Không tìm thấy sản phẩm.</p>;
 
@@ -140,15 +164,15 @@ export default function ProductDetailPage() {
         </p>
 
         <div className={styles.meta}>
-          {displayedDescription && <p><strong>📝 Mô tả:</strong> {displayedDescription}</p>}
-          {displayedMaterial && <p><strong>🔧 Chất liệu:</strong> {displayedMaterial}</p>}
-          {displayedColor && <p><strong>🎨 Màu sắc:</strong> {displayedColor}</p>}
-          {displayedSize && <p><strong>📏 Kích cỡ:</strong> {displayedSize}</p>}
+          {displayedDescription && <p><strong> Mô tả:</strong> {displayedDescription}</p>}
+          {displayedMaterial && <p><strong> Chất liệu:</strong> {displayedMaterial}</p>}
+          {displayedColor && <p><strong> Màu sắc:</strong> {displayedColor}</p>}
+          {displayedSize && <p><strong> Kích cỡ:</strong> {displayedSize}</p>}
           {categoryName && <p><strong>📂 Danh mục:</strong> {categoryName}</p>}
         </div>
 
         <div className={styles.actions}>
-          <button className={styles.buyBtn}>🛒 Thêm vào giỏ hàng</button>
+          <button className={styles.buyBtn} onClick={handleAddToCart}>🛒 Thêm vào giỏ hàng</button>
           <button className={styles.orderBtn} onClick={handleOrderNow}>🧾 Đặt hàng ngay</button>
           <a href="tel:0123456789" className={styles.contactBtn}>📞 Liên hệ tư vấn</a>
         </div>
